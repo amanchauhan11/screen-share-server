@@ -15,11 +15,11 @@ const io = new Server(server, {
   }
 });
 
-let memberMap = {};
+const memberMap = {};
 
 io.on("connection", socket => {
   let name = socket.handshake.query.name;
-  memberMap[socket.handshake.query.uid] = socket.handshake.query.name;
+  memberMap[socket.handshake.query.uid] = name;
   console.log(`User: ${name}, connected`);
   io.emit("member_update", memberMap);
   socket.on("offer", msg => {
@@ -28,9 +28,9 @@ io.on("connection", socket => {
   socket.on("answer", msg => {
     socket.broadcast.emit("answer", msg);
   });
-  socket.on("disconnect", err => {
+  socket.on("disconnecting", err => {
     delete memberMap[socket.handshake.query.uid];
-    socket.broadcast.emit("member_udpate", memberMap);
+    io.emit("member_update", memberMap);
     console.log(`User: ${name}, disconnected`);
   });
 });
